@@ -1,2 +1,2 @@
 feedparser==6.0.8
-instapy-cli==0.6.15
+instagrapi==0.14.0
