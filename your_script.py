@@ -3,6 +3,7 @@ import urllib.request
 from instabot import Bot
 import os
 import re
+import os
 
 def download_and_post_to_instagram(entry, bot):
     try:
@@ -18,11 +19,16 @@ def clean_html_tags(text):
     # Implement your HTML tag cleaning logic here
     pass
 
+def get_latest_post_id():
+    # Implement a method to retrieve the ID of the latest posted item from Instagram
+    # You can use the Instabot library or another method to fetch this information
+    pass
+
 if __name__ == "__main__":
     NewsFeed = feedparser.parse("https://www.sportsmole.co.uk/football/barcelona.xml")
     bot = Bot()
 
-    # Retrieve Instagram credentials from environment variables
+    # Set your Instagram credentials using environment variables
     username = os.environ.get("INSTAGRAM_USERNAME")
     password = os.environ.get("INSTAGRAM_PASSWORD")
 
@@ -37,16 +43,17 @@ if __name__ == "__main__":
 
     print('Number of RSS posts:', len(NewsFeed.entries))
 
-    latest_entry_id = None
+    latest_post_id = get_latest_post_id()  # Get the latest posted item's ID from Instagram
 
-    for entry in NewsFeed.entries:
+    for entry in reversed(NewsFeed.entries):
         try:
             entry_id = entry.get('id')
-            if entry_id != latest_entry_id:
-                print("New feed item found:")
-                print(clean_html_tags(entry.description))
-                download_and_post_to_instagram(entry, bot)
-                latest_entry_id = entry_id
+            if entry_id == latest_post_id:
+                print("All new posts have been processed.")
+                break
+            print("New feed item found:")
+            print(clean_html_tags(entry.description))
+            download_and_post_to_instagram(entry, bot)
         except Exception as e:
             print(f"An error occurred: {e}")
 
