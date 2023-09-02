@@ -1,17 +1,19 @@
 import feedparser
 import urllib.request
-from instabot import Bot
 import os
 import re
-import os
+import time
+from instapy_cli import client
 
-def download_and_post_to_instagram(entry, bot):
+def download_and_post_to_instagram(entry, caption):
     try:
         url = entry.media_content[0]['url']
-        img_data = urllib.request.urlopen(url).read()
-        caption = entry.title + '\n' + clean_html_tags(entry.description) + '\n\n' + tags
-        bot.upload_photo(photo=img_data, caption=caption)
+        img_filename = "imgmain.jpg"
+        urllib.request.urlretrieve(url, img_filename)
+        with client(username, password) as api:
+            api.upload(img_filename, caption=caption)
         print("Posted to Instagram successfully.")
+        os.remove(img_filename)  # Remove the image file after posting
     except Exception as e:
         print(f"Error posting to Instagram: {e}")
 
@@ -19,21 +21,17 @@ def clean_html_tags(text):
     # Implement your HTML tag cleaning logic here
     pass
 
-def get_latest_post_id():
-    # Implement a method to retrieve the ID of the latest posted item from Instagram
-    # You can use the Instabot library or another method to fetch this information
-    pass
-
 if __name__ == "__main__":
     NewsFeed = feedparser.parse("https://www.sportsmole.co.uk/football/barcelona.xml")
-    bot = Bot()
 
     # Set your Instagram credentials using environment variables
     username = os.environ.get("INSTAGRAM_USERNAME")
     password = os.environ.get("INSTAGRAM_PASSWORD")
 
     try:
-        bot.login(username=username, password=password)
+        print("Logging in to Instagram...")
+        with client(username, password) as api:
+            api.login()
         print("Logged in to Instagram successfully.")
     except Exception as e:
         print(f"Error logging into Instagram: {e}")
@@ -43,18 +41,24 @@ if __name__ == "__main__":
 
     print('Number of RSS posts:', len(NewsFeed.entries))
 
-    latest_post_id = get_latest_post_id()  # Get the latest posted item's ID from Instagram
+    latest_entry_id = None
 
-    for entry in reversed(NewsFeed.entries):
-        try:
-            entry_id = entry.get('id')
-            if entry_id == latest_post_id:
-                print("All new posts have been processed.")
-                break
-            print("New feed item found:")
-            print(clean_html_tags(entry.description))
-            download_and_post_to_instagram(entry, bot)
-        except Exception as e:
-            print(f"An error occurred: {e}")
+    while True:
+        for entry in reversed(NewsFeed.entries):
+            try:
+                entry_id = entry.get('id')
+                if entry_id == latest_entry_id:
+                    print("All new posts have been processed.")
+                    break
+                print("New feed item found:")
+                print(clean_html_tags(entry.description))
+                caption = entry.title + '\n' + clean_html_tags(entry.description) + '\n\n' + tags
+                download_and_post_to_instagram(entry, caption)
+                latest_entry_id = entry_id
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+        print("Waiting for 10 minutes before checking for new posts...")
+        time.sleep(600)  # Sleep for 10 minutes before checking again
 
     print("Script execution completed.")
