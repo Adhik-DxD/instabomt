@@ -1,28 +1,29 @@
-name: RSS to Instagram
+name: Instagram Post
 
 on:
   schedule:
-    - cron: '*/10 * * * *'# Run every 6 hours (adjust as needed)
+    - cron: '*/10 * * * *' # Runs every 10 minutes
 
 jobs:
-  post_to_instagram:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt  # Replace with the actual requirements file
-        working-directory: ./  # Adjust to your project directory if needed
+    - name: Install dependencies
+      run: |
+        pip install feedparser
+        pip install instapy-cli
 
-      - name: Execute script
-        run: python your_script.py  # Replace with the actual name of your script
-        env:
-          INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
-          INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
+    - name: Execute script
+      run: python your_script.py
+      env:
+        INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
+        INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
