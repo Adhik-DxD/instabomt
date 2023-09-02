@@ -3,15 +3,18 @@ import urllib.request
 import os
 import re
 import time
-from instapy_cli import client
+from instagrapi import Client
 
 def download_and_post_to_instagram(entry, username, password):
     try:
         url = entry.media_content[0]['url']
         img_filename = "imgmain.jpg"
         urllib.request.urlretrieve(url, img_filename)
-        with client(username, password) as api:
-            api.upload(img_filename, caption=caption)
+        
+        client = Client()
+        client.login(username, password)
+        client.upload_photo(img_filename, caption=caption)
+        
         print("Posted to Instagram successfully.")
         os.remove(img_filename)  # Remove the image file after posting
     except Exception as e:
@@ -74,4 +77,3 @@ if __name__ == "__main__":
         time.sleep(600)  # Sleep for 10 minutes before checking again
 
     print("Script execution completed.")
-    
