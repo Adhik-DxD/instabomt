@@ -1,2 +1,2 @@
 feedparser==6.0.8
-instagrapi==0.14.0
+instagrapi==1.19.8
